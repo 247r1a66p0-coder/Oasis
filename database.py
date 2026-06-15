@@ -1,21 +1,18 @@
-import csv
-import os
+import sqlite3
 
-FILE_NAME = "data/bmi_data.csv"
+conn = sqlite3.connect(
+    'database/chat_app.db'
+)
 
-def save_data(name, weight, height, bmi):
+cursor = conn.cursor()
 
-    file_exists = os.path.isfile(FILE_NAME)
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    message TEXT
+)
+""")
 
-    with open(FILE_NAME, "a", newline="") as file:
+conn.commit()
 
-        writer = csv.writer(file)
-
-        if not file_exists:
-            writer.writerow(
-                ["Name", "Weight", "Height", "BMI"]
-            )
-
-        writer.writerow(
-            [name, weight, height, bmi]
-        )
+print("Database created")
