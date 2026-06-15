@@ -1,112 +1,117 @@
 import tkinter as tk
 from tkinter import messagebox
+import random
+import string
 
-from bmi_logic import (
-    calculate_bmi,
-    bmi_category
-)
-
-from database import save_data
-from graph import show_graph
-
-def calculate():
+def generate_password():
 
     try:
-        name = name_entry.get()
+        length = int(length_entry.get())
 
-        weight = float(weight_entry.get())
-        height = float(height_entry.get())
-
-        if weight <= 0 or height <= 0:
-
+        if length < 4:
             messagebox.showerror(
                 "Error",
-                "Enter valid positive values"
+                "Password length must be at least 4"
             )
-
             return
 
-        bmi = calculate_bmi(
-            weight,
-            height
+        characters = ""
+
+        if var_upper.get():
+            characters += string.ascii_uppercase
+
+        if var_lower.get():
+            characters += string.ascii_lowercase
+
+        if var_digits.get():
+            characters += string.digits
+
+        if var_symbols.get():
+            characters += string.punctuation
+
+        if not characters:
+            messagebox.showerror(
+                "Error",
+                "Select at least one character type"
+            )
+            return
+
+        password = ''.join(
+            random.choice(characters)
+            for _ in range(length)
         )
 
-        category = bmi_category(bmi)
+        password_entry.delete(0, tk.END)
+        password_entry.insert(0, password)
 
-        result_label.config(
-            text=f"BMI: {bmi}\nCategory: {category}"
-        )
-
-        save_data(
-            name,
-            weight,
-            height,
-            bmi
-        )
-
-    except ValueError:
-
+    except:
         messagebox.showerror(
             "Error",
-            "Please enter valid numbers"
+            "Invalid input"
+        )
+
+def copy_password():
+
+    password = password_entry.get()
+
+    if password:
+        pyperclip.copy(password)
+        messagebox.showinfo(
+            "Copied",
+            "Password copied to clipboard"
         )
 
 root = tk.Tk()
+root.title("Password Generator")
+root.geometry("400x350")
 
-root.title("Advanced BMI Calculator")
+tk.Label(root, text="Password Length").pack()
 
-root.geometry("400x450")
+length_entry = tk.Entry(root)
+length_entry.pack()
 
-title = tk.Label(
+var_upper = tk.BooleanVar(value=True)
+var_lower = tk.BooleanVar(value=True)
+var_digits = tk.BooleanVar(value=True)
+var_symbols = tk.BooleanVar(value=True)
+
+tk.Checkbutton(
     root,
-    text="BMI Calculator",
-    font=("Arial", 18, "bold")
-)
-
-title.pack(pady=10)
-
-tk.Label(
-    root,
-    text="Name"
+    text="Uppercase Letters",
+    variable=var_upper
 ).pack()
 
-name_entry = tk.Entry(root)
-name_entry.pack()
-
-tk.Label(
+tk.Checkbutton(
     root,
-    text="Weight (kg)"
+    text="Lowercase Letters",
+    variable=var_lower
 ).pack()
 
-weight_entry = tk.Entry(root)
-weight_entry.pack()
-
-tk.Label(
+tk.Checkbutton(
     root,
-    text="Height (m)"
+    text="Numbers",
+    variable=var_digits
 ).pack()
 
-height_entry = tk.Entry(root)
-height_entry.pack()
+tk.Checkbutton(
+    root,
+    text="Symbols",
+    variable=var_symbols
+).pack()
 
 tk.Button(
     root,
-    text="Calculate BMI",
-    command=calculate
+    text="Generate Password",
+    command=generate_password
 ).pack(pady=10)
 
-result_label = tk.Label(
-    root,
-    text="Result will appear here",
-    font=("Arial", 12)
-)
-
-result_label.pack(pady=10)
+password_entry = tk.Entry(root, width=35)
+password_entry.pack()
 
 tk.Button(
     root,
-    text="Show BMI Graph",
-    command=show_graph
+    text="Copy Password",
+    command=copy_password
 ).pack(pady=10)
 
 root.mainloop()
